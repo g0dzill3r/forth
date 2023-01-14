@@ -1,0 +1,5 @@
+stack only holds int
+secondary stack
+swing ui
+multiline ui
+don'e leave secondary stack empty
