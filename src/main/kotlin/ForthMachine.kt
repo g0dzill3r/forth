@@ -6,6 +6,7 @@ interface Invokable {
 }
 
 abstract class Builtin (val name: String): Invokable {
+    fun error (message: String): Nothing  = throw IllegalStateException (message)
     override fun toString(): String = ": $name   <builtin> ;"
 }
 
@@ -101,12 +102,12 @@ class ForthMachine {
     }
 
     init {
-        listOf (BUILTINS, COND_BUILTINS, MATH_BUILTINS, RETSTACK_BUILTINS).forEach {
+        listOf (BUILTINS, COND_BUILTINS, MATH_BUILTINS, RETSTACK_BUILTINS, LOOP_BULTINS).forEach {
             instances (it).forEach {
                 dictionary.add (it)
             }
         }
-        listOf (EXTRAS, COND_EXTRAS, BUILTIN_EXTRAS, MATH_EXTRAS, RETSTACK_EXTRAS).forEach {
+        listOf (EXTRAS, COND_EXTRAS, BUILTIN_EXTRAS, MATH_EXTRAS, RETSTACK_EXTRAS, LOOP_EXTRAS).forEach {
             it.forEach {
                 execute (it)
             }

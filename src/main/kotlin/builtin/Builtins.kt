@@ -9,7 +9,6 @@ val BUILTINS = listOf (
     Spaces::class,
     Emit::class,
     CarriageReturn::class,
-    Do::class,
     Period::class,
     Swap::class,
     Dup::class,
@@ -23,7 +22,6 @@ val BUILTINS = listOf (
     TwoOver::class,
     TwoDrop::class,
     Forget::class,
-    Begin::class
 )
 
 val BUILTIN_EXTRAS = listOf (
@@ -117,85 +115,6 @@ class SafePeriod: Builtin(NAME) {
     }
 }
 
-class Do: Builtin(NAME) {
-    companion object {
-        const val NAME= "DO"
-        const val LOOP = "LOOP"
-        const val LOOP_PLUS = "+LOOP"
-    }
-
-    private fun collect (iter: PeekableIterator<Token>) : Pair<List<Token>, Boolean> {
-        val ops = mutableListOf<Token> ()
-        var embedded = 0
-
-        while (true) {
-            if (! iter.hasNext ()) {
-                throw IllegalStateException("Missing LOOP instruction.")
-            }
-            val next = iter.next ()
-            if (next is Token.Word) {
-                if (next.word == LOOP || next.word == LOOP_PLUS) {
-                    if (embedded > 0) {
-                        embedded --
-                    } else {
-                        return Pair (ops, next.word == LOOP_PLUS)
-                    }
-                } else if (next.word == NAME) {
-                    embedded ++
-                }
-            }
-            ops.add (next)
-        }
-
-        // NOT REACHED
-    }
-
-    private fun update (index: Int, depth: Int, list: List<Token>): List<Token> {
-        val word = Char ('I'.code + depth - 1).toString ()
-        return list.map {
-                if (it is Token.Word && it.word == word) {
-                    Token.IntValue (index, it.loc)
-                } else {
-                    it
-                }
-        }
-    }
-
-    var depth = 0
-
-    override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        try {
-            depth ++
-            val start = sm.pop()
-            val end = sm.pop()
-            val (loop, isPlus) = collect(iter)
-
-            var i = start
-            do {
-                sm.execute (update (i, depth, loop), terminal)
-                val delta = if (isPlus) {
-                    sm.pop ()
-                } else {
-                    1
-                }
-                i += delta
-                if (delta > 0) {
-                    if (i >= end) {
-                        break
-                    }
-                } else {
-                    if (i <= end) {
-                        break
-                    }
-                }
-            } while (true)
-        }
-        finally {
-            depth --
-        }
-        return
-    }
-}
 
 class Swap : Builtin(NAME) {
     companion object {
@@ -322,38 +241,6 @@ class Forget : Builtin(NAME) {
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         val word = iter.next () as Token.Word
         sm.dictionary.forget (word.word)
-    }
-}
-class Begin : Builtin (NAME) {
-    companion object {
-        const val NAME = "BEGIN"
-        const val UNTIL = "UNTIL"
-    }
-
-    private fun collect (iter: PeekableIterator<Token>): List<Token> {
-        val list = mutableListOf<Token> ()
-        while (true) {
-            if (! iter.hasNext ()) {
-                throw IllegalStateException ("Unterminated $NAME loop.")
-            }
-            val next = iter.next ()
-            if (next is Token.Word && next.word == UNTIL) {
-                break
-            }
-            list.add (next)
-        }
-        return list
-    }
-
-    override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val ops = collect (iter)
-        while (true) {
-            sm.execute (ops, terminal)
-            if (! sm.popBoolean()) {
-                break
-            }
-        }
-        return
     }
 }
 

@@ -30,3 +30,7 @@
  15   17   19   21   23
  20   22   24   26   28
   ok
+
+
+forth> : COMPOUND  ( amt int -- )           SWAP 21 1 DO  I . 2DUP R% + DUP . CR LOOP  2DROP ;
+forth> 10000  3 COMPOUND

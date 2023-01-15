@@ -4,6 +4,7 @@ import Builtin
 import ForthMachine
 import PeekableIterator
 import Token
+import java.util.*
 
 val COND_BUILTINS = listOf (
     Equals::class,
@@ -158,6 +159,14 @@ class Invert: Builtin (NAME) {
     }
 }
 
+/**
+ * Conditional logic statement.
+ *
+ * IF <ops> THEN
+ *
+ * IF <ops> ELSE <ops> THEN
+ */
+
 class If: Builtin(NAME) {
     companion object {
         const val NAME = "IF"
@@ -165,87 +174,69 @@ class If: Builtin(NAME) {
         const val ELSE = "ELSE"
     }
 
-    private fun collect (iter: PeekableIterator<Token>, sm: ForthMachine): Pair<List<Token>, List<Token>?> {
-        val list = mutableListOf<Token> ()
-        var embedded = 0
+    private class IfAbsorber : Absorber {
+        private var sawElse = false
 
-        while (true) {
-            if (! iter.hasNext ()) {
-                throw IllegalStateException ("Unterminated IF.")
-            }
-            val peek = iter.peek ()
-            if (peek is Token.Word) {
-                when (peek.word) {
-                    NAME -> {
-                        embedded ++
-                        list.add (iter.next  ())
-                    }
+        override fun absorb (token: Token, stack: Stack<Absorber>) {
+            if (token is Token.Word) {
+                when (token.word) {
+                    NAME -> stack.push (IfAbsorber ())
                     ELSE -> {
-                        if (embedded > 0) {
-                            list.add (iter.next ())
+                        if (sawElse) {
+                            error ("Unexpected ELSE encountered.")
                         } else {
-                            iter.next ()
-                            return Pair (list, collectElse (iter, sm))
+                            sawElse = true
                         }
                     }
-                    THEN -> {
-                        if (embedded > 0) {
-                            embedded --
-                            list.add (iter.next ())
-                        } else {
-                            iter.next ()
-                            return Pair (list, null)
-                        }
-                    }
-                    else -> list.add (iter.next ())
+                    THEN -> stack.pop ()
                 }
-            } else {
-                list.add (iter.next ())
             }
+            return
         }
     }
 
-    private fun collectElse (iter: PeekableIterator<Token>, sm: ForthMachine): List<Token> {
-        val list = mutableListOf<Token> ()
-        var embedded = 0
+    fun parseIf (iter: PeekableIterator<Token>): Pair<List<Token>, List<Token>?> {
+        val happy = mutableListOf<Token> ()
+        var sad: MutableList<Token>? = null
+        val absorbers = Stack<Absorber> ()
+
+        fun addToken (token: Token) = (sad ?: happy).add (token)
 
         while (true) {
             if (! iter.hasNext ()) {
-                throw IllegalStateException("Unterminated IF/ELSE.")
+                error ("Unterminated IF expression.")
             }
-            val peek = iter.peek ()
-            if (peek is Token.Word) {
-                when (peek.word) {
+            val next = iter.next ()
+            if (absorbers.isNotEmpty ()) {
+                absorbers.peek ().absorb (next, absorbers)
+                addToken (next)
+                continue
+            }
+            if (next is Token.Word) {
+                when (next.word) {
                     NAME -> {
-                        embedded ++
-                        list.add (iter.next ())
+                        absorbers.push (IfAbsorber ())
+                        addToken (next)
                     }
                     ELSE -> {
-                        if (embedded == 0) {
-                            throw IllegalStateException ("Second ELSE in IF encountered")
-                        } else {
-                            list.add (iter.next ())
+                        if (sad != null) {
+                            error ("Unexpected ELSE encountered.")
                         }
+                        sad = mutableListOf ()
                     }
-                    THEN -> {
-                        if (embedded > 0) {
-                            embedded --
-                            list.add (iter.next ())
-                        } else {
-                            iter.next ()
-                            return list
-                        }
-                    }
-                    else -> list.add (iter.next ())
+                    THEN ->break
+                    else -> addToken (next)
                 }
             } else {
-                list.add (iter.next ())
+                addToken (next)
             }
         }
+
+        return happy to sad
     }
 
     override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (happy, sad) = collect (iter, sm)
+        val (happy, sad) = parseIf (iter)
         if (sm.popBoolean()) {
             sm.execute (happy, terminal)
         } else {
@@ -256,3 +247,102 @@ class If: Builtin(NAME) {
         return
     }
 }
+
+//class If: Builtin(NAME) {
+//    companion object {
+//        const val NAME = "IF"
+//        const val THEN = "THEN"
+//        const val ELSE = "ELSE"
+//    }
+//
+//    private fun collect (iter: PeekableIterator<Token>, sm: ForthMachine): Pair<List<Token>, List<Token>?> {
+//        val list = mutableListOf<Token> ()
+//        var embedded = 0
+//
+//        while (true) {
+//            if (! iter.hasNext ()) {
+//                throw IllegalStateException ("Unterminated IF.")
+//            }
+//            val peek = iter.peek ()
+//            if (peek is Token.Word) {
+//                when (peek.word) {
+//                    NAME -> {
+//                        embedded ++
+//                        list.add (iter.next  ())
+//                    }
+//                    ELSE -> {
+//                        if (embedded > 0) {
+//                            list.add (iter.next ())
+//                        } else {
+//                            iter.next ()
+//                            return Pair (list, collectElse (iter, sm))
+//                        }
+//                    }
+//                    THEN -> {
+//                        if (embedded > 0) {
+//                            embedded --
+//                            list.add (iter.next ())
+//                        } else {
+//                            iter.next ()
+//                            return Pair (list, null)
+//                        }
+//                    }
+//                    else -> list.add (iter.next ())
+//                }
+//            } else {
+//                list.add (iter.next ())
+//            }
+//        }
+//    }
+//
+//    private fun collectElse (iter: PeekableIterator<Token>, sm: ForthMachine): List<Token> {
+//        val list = mutableListOf<Token> ()
+//        var embedded = 0
+//
+//        while (true) {
+//            if (! iter.hasNext ()) {
+//                throw IllegalStateException("Unterminated IF/ELSE.")
+//            }
+//            val peek = iter.peek ()
+//            if (peek is Token.Word) {
+//                when (peek.word) {
+//                    NAME -> {
+//                        embedded ++
+//                        list.add (iter.next ())
+//                    }
+//                    ELSE -> {
+//                        if (embedded == 0) {
+//                            throw IllegalStateException ("Second ELSE in IF encountered")
+//                        } else {
+//                            list.add (iter.next ())
+//                        }
+//                    }
+//                    THEN -> {
+//                        if (embedded > 0) {
+//                            embedded --
+//                            list.add (iter.next ())
+//                        } else {
+//                            iter.next ()
+//                            return list
+//                        }
+//                    }
+//                    else -> list.add (iter.next ())
+//                }
+//            } else {
+//                list.add (iter.next ())
+//            }
+//        }
+//    }
+//
+//    override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
+//        val (happy, sad) = collect (iter, sm)
+//        if (sm.popBoolean()) {
+//            sm.execute (happy, terminal)
+//        } else {
+//            if (sad != null) {
+//                sm.execute (sad, terminal)
+//            }
+//        }
+//        return
+//    }
+//}
