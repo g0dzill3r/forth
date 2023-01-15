@@ -121,7 +121,7 @@ class Do: Builtin(NAME) {
     companion object {
         const val NAME= "DO"
         const val LOOP = "LOOP"
-        const val LOOP_PLUS = "LOOP+"
+        const val LOOP_PLUS = "+LOOP"
     }
 
     private fun collect (iter: PeekableIterator<Token>) : Pair<List<Token>, Boolean> {
@@ -171,14 +171,24 @@ class Do: Builtin(NAME) {
             val (loop, isPlus) = collect(iter)
 
             var i = start
-            while (i < end) {
+            do {
                 sm.execute (update (i, depth, loop), terminal)
-                if (isPlus) {
-                    i += sm.pop ()
+                val delta = if (isPlus) {
+                    sm.pop ()
                 } else {
-                    i ++
+                    1
                 }
-            }
+                i += delta
+                if (delta > 0) {
+                    if (i >= end) {
+                        break
+                    }
+                } else {
+                    if (i <= end) {
+                        break
+                    }
+                }
+            } while (true)
         }
         finally {
             depth --
