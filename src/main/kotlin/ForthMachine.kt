@@ -46,9 +46,10 @@ class ForthMachine {
 
     fun execute (string: String): List<String> {
         val els = ForthParser.parse (string).iterator()
+        val terminal = StringBuffer ()
         return buildList {
             els.forEach {
-                add (execute (it))
+                add (execute (it, terminal))
             }
         }
     }
@@ -82,8 +83,7 @@ class ForthMachine {
         return
     }
 
-    fun execute (stmt: Statement) : String {
-        val terminal = StringBuffer ()
+    fun execute (stmt: Statement, terminal: StringBuffer = StringBuffer ()) : String {
         when (stmt) {
             is Statement.Expression -> execute (stmt, terminal)
             is Statement.Declaration -> execute (stmt)

@@ -114,6 +114,9 @@ class Do: Builtin(NAME) {
                 }
             } while (true)
         }
+        catch (leave: LeaveException) {
+            // IGNORED
+        }
         finally {
             depth --
         }

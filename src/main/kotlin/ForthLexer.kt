@@ -80,7 +80,7 @@ object ForthLexer {
             while (iter.hasNext()) {
                 val c = iter.next()
                 if (inWord) {
-                    if (c == ' ') {
+                    if (c == ' ' || c == '\n') {
                         val token = buf.toString()
                         if (token.isNumber) {
                             yield(Token.IntValue(token.toInt(), iter.location))
@@ -107,7 +107,7 @@ object ForthLexer {
                                 inWord = true
                             }
                         }
-
+                        '\n' -> Unit
                         else -> {
                             buf.append(c)
                             inWord = true
