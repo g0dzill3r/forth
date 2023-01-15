@@ -246,8 +246,6 @@ class If: Builtin(NAME) {
 
     override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         val (happy, sad) = collect (iter, sm)
-//        println ("HAPPY - ${happy.map {it.render ()}}")
-//        println ("SAD - ${sad?.map {it.render ()}}")
         if (sm.popBoolean()) {
             sm.execute (happy, terminal)
         } else {

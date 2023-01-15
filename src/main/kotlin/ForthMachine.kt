@@ -14,6 +14,7 @@ abstract class Builtin (val name: String): Invokable {
  */
 
 class ForthMachine {
+    val returnStack = Stack<Int> ()
     val stack = Stack<Int> ()
     val isEmpty: Boolean
         get () = stack.isEmpty()
@@ -58,6 +59,7 @@ class ForthMachine {
                 when (val next = iter.next ()) {
                     is Token.IntValue -> stack.push (next.value)
                     is Token.QuotedString -> terminal.append (next.string)
+                    is Token.Comment -> Unit
                     is Token.Word -> {
                         val word = next.word
                         val op = dictionary.get (word)
@@ -99,12 +101,12 @@ class ForthMachine {
     }
 
     init {
-        listOf (BUILTINS, COND_BUILTINS, MATH_BUILTINS).forEach {
+        listOf (BUILTINS, COND_BUILTINS, MATH_BUILTINS, RETSTACK_BUILTINS).forEach {
             instances (it).forEach {
                 dictionary.add (it)
             }
         }
-        listOf (EXTRAS, BUILTIN_EXTRAS, MATH_EXTRAS).forEach {
+        listOf (EXTRAS, COND_EXTRAS, BUILTIN_EXTRAS, MATH_EXTRAS, RETSTACK_EXTRAS).forEach {
             it.forEach {
                 execute (it)
             }
