@@ -79,7 +79,7 @@ class Do: Builtin(NAME) {
         val word = Char ('I'.code + depth - 1).toString ()
         return list.map {
             if (it is Token.Word && it.word == word) {
-                Token.IntValue (index, it.loc)
+                Token.Word ("$index", it.loc)
             } else {
                 it
             }

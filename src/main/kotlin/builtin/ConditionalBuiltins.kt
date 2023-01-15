@@ -141,11 +141,19 @@ class Abort: Builtin(NAME) {
         const val NAME = "ABORT"
     }
 
-    override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        if (sm.popBoolean ()) {
-            throw IllegalStateException ("<ERROR>")
+    override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
+        if (iter.hasNext ()) {
+            val next = iter.next ()
+            val message = when (next) {
+                is Token.QuotedString -> next.string
+                else -> next.render ()
+            }
+            throw Exception ("ABORT: $message")
+        } else {
+            throw Exception ("ABORT")
         }
-        return
+
+        // NOT REACHED
     }
 }
 class Invert: Builtin (NAME) {
@@ -248,101 +256,4 @@ class If: Builtin(NAME) {
     }
 }
 
-//class If: Builtin(NAME) {
-//    companion object {
-//        const val NAME = "IF"
-//        const val THEN = "THEN"
-//        const val ELSE = "ELSE"
-//    }
-//
-//    private fun collect (iter: PeekableIterator<Token>, sm: ForthMachine): Pair<List<Token>, List<Token>?> {
-//        val list = mutableListOf<Token> ()
-//        var embedded = 0
-//
-//        while (true) {
-//            if (! iter.hasNext ()) {
-//                throw IllegalStateException ("Unterminated IF.")
-//            }
-//            val peek = iter.peek ()
-//            if (peek is Token.Word) {
-//                when (peek.word) {
-//                    NAME -> {
-//                        embedded ++
-//                        list.add (iter.next  ())
-//                    }
-//                    ELSE -> {
-//                        if (embedded > 0) {
-//                            list.add (iter.next ())
-//                        } else {
-//                            iter.next ()
-//                            return Pair (list, collectElse (iter, sm))
-//                        }
-//                    }
-//                    THEN -> {
-//                        if (embedded > 0) {
-//                            embedded --
-//                            list.add (iter.next ())
-//                        } else {
-//                            iter.next ()
-//                            return Pair (list, null)
-//                        }
-//                    }
-//                    else -> list.add (iter.next ())
-//                }
-//            } else {
-//                list.add (iter.next ())
-//            }
-//        }
-//    }
-//
-//    private fun collectElse (iter: PeekableIterator<Token>, sm: ForthMachine): List<Token> {
-//        val list = mutableListOf<Token> ()
-//        var embedded = 0
-//
-//        while (true) {
-//            if (! iter.hasNext ()) {
-//                throw IllegalStateException("Unterminated IF/ELSE.")
-//            }
-//            val peek = iter.peek ()
-//            if (peek is Token.Word) {
-//                when (peek.word) {
-//                    NAME -> {
-//                        embedded ++
-//                        list.add (iter.next ())
-//                    }
-//                    ELSE -> {
-//                        if (embedded == 0) {
-//                            throw IllegalStateException ("Second ELSE in IF encountered")
-//                        } else {
-//                            list.add (iter.next ())
-//                        }
-//                    }
-//                    THEN -> {
-//                        if (embedded > 0) {
-//                            embedded --
-//                            list.add (iter.next ())
-//                        } else {
-//                            iter.next ()
-//                            return list
-//                        }
-//                    }
-//                    else -> list.add (iter.next ())
-//                }
-//            } else {
-//                list.add (iter.next ())
-//            }
-//        }
-//    }
-//
-//    override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-//        val (happy, sad) = collect (iter, sm)
-//        if (sm.popBoolean()) {
-//            sm.execute (happy, terminal)
-//        } else {
-//            if (sad != null) {
-//                sm.execute (sad, terminal)
-//            }
-//        }
-//        return
-//    }
-//}
+// EOF

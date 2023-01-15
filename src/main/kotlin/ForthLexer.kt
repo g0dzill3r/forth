@@ -13,10 +13,6 @@ sealed class Token (val loc: Source.Location) {
         override fun render(): String = ";"
         override fun toString(): String = "Semicolon"
     }
-    class IntValue (val value: Int, loc: Source.Location): Token (loc) {
-        override fun render(): String = "$value"
-        override fun toString(): String = "IntValue($value)"
-    }
     class Word (val word: String, loc: Source.Location): Token (loc) {
         override fun render(): String = word
         override fun toString(): String = "Word($word)"
@@ -82,11 +78,7 @@ object ForthLexer {
                 if (inWord) {
                     if (c == ' ' || c == '\n') {
                         val token = buf.toString()
-                        if (token.isNumber) {
-                            yield(Token.IntValue(token.toInt(), iter.location))
-                        } else {
-                            yield(Token.Word(token, iter.location))
-                        }
+                        yield(Token.Word(token, iter.location))
                         buf.setLength(0)
                         inWord = false
                     } else {
@@ -117,13 +109,7 @@ object ForthLexer {
             }
             if (buf.isNotEmpty()) {
                 val token = buf.toString()
-                yield(
-                    if (token.isNumber) {
-                        Token.IntValue(token.toInt(), iter.location)
-                    } else {
-                        Token.Word(token, iter.location)
-                    }
-                )
+                yield (Token.Word (token, iter.location))
             }
         }
     }

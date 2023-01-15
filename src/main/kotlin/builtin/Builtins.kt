@@ -22,6 +22,7 @@ val BUILTINS = listOf (
     TwoOver::class,
     TwoDrop::class,
     Forget::class,
+    Quit::class
 )
 
 val BUILTIN_EXTRAS = listOf (
@@ -104,7 +105,8 @@ class Period: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        terminal.append ("${sm.pop ()} ")
+        val value = sm.pop ()
+        terminal.append ("${value.toString (sm.base)} ")
     }
 }
 
@@ -248,6 +250,17 @@ class Forget : Builtin(NAME) {
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         val word = iter.next () as Token.Word
         sm.dictionary.forget (word.word)
+    }
+}
+
+class Quit: Builtin (NAME) {
+    companion object {
+        const val NAME = "QUIT"
+    }
+
+    override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
+        System.exit (-1)
+        // NOT REACHED
     }
 }
 

@@ -1,0 +1,46 @@
+CLEAR
+: ** ( a b -- a^b )
+    >R
+    @R
+    DUP 1 > IF
+      1 DO DUP LOOP
+    ELSE
+      DROP
+    THEN
+    R>
+    DUP 1 > IF
+      1 DO * LOOP
+    ELSE
+      DROP
+    THEN
+;
+
+7 1 ** .
+7 2 ** .
+10 3 ** .
+2 8 ** .
+
+================
+
+33
+DUP DECIMAL . CR
+DUP HEX . CR
+DUP BINARY . CR
+DUP OCTAL . CR
+
+
+================
+
+================
+
+================
+
+================
+
+================
+
+v
+================
+
+================
+

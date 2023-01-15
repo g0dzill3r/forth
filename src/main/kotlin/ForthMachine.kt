@@ -12,6 +12,8 @@ abstract class Builtin (val name: String): Invokable {
 
 /**
  * https://www.forth.com/starting-forth/3-forth-editor-blocks-buffer/
+ * https://galileo.phys.virginia.edu/classes/551.jvn.fall01/primer.htm#contents
+ * https://thinking-forth.sourceforge.net/
  */
 
 class ForthMachine {
@@ -34,6 +36,7 @@ class ForthMachine {
     }
     fun peek (): Int = stack.peek ()
 
+    var base: Int = 10
     val dictionary = ForthDictionary ()
 
     val TRUE = -1
@@ -54,12 +57,24 @@ class ForthMachine {
         }
     }
 
+    /**
+     * Attempt to parse an unrecognized word as a numberic amount.
+     */
+
+    private fun maybeNumeric (word: String): Int? {
+        return try {
+            Integer.parseInt (word, base)
+        }
+        catch (e: Exception) {
+            null
+        }
+    }
+
     fun execute (list: List<Token>, terminal: StringBuffer) {
         try {
             val iter = list.iterator ().peekable()
             while (iter.hasNext ()) {
                 when (val next = iter.next ()) {
-                    is Token.IntValue -> stack.push (next.value)
                     is Token.QuotedString -> terminal.append (next.string)
                     is Token.Comment -> Unit
                     is Token.Word -> {
@@ -68,8 +83,13 @@ class ForthMachine {
                         if (op != null) {
                             op.perform (iter, this, terminal)
                         } else {
-                            terminal.append ("$word?")
-                            return
+                            val numeric = maybeNumeric (word)
+                            if (numeric != null) {
+                                push (numeric)
+                            } else {
+                                terminal.append ("$word?")
+                                return
+                            }
                         }
                     }
                     else -> throw IllegalStateException ("Unexpected token type: ${next::class.simpleName}")
@@ -102,12 +122,12 @@ class ForthMachine {
     }
 
     init {
-        listOf (BUILTINS, COND_BUILTINS, MATH_BUILTINS, RETSTACK_BUILTINS, LOOP_BULTINS).forEach {
+        listOf (BUILTINS, COND_BUILTINS, MATH_BUILTINS, RETSTACK_BUILTINS, LOOP_BULTINS, UNSIGNED_BUILTINS).forEach {
             instances (it).forEach {
                 dictionary.add (it)
             }
         }
-        listOf (EXTRAS, COND_EXTRAS, BUILTIN_EXTRAS, MATH_EXTRAS, RETSTACK_EXTRAS, LOOP_EXTRAS).forEach {
+        listOf (EXTRAS, COND_EXTRAS, BUILTIN_EXTRAS, MATH_EXTRAS, RETSTACK_EXTRAS, LOOP_EXTRAS, UNSIGNED_EXTRAS).forEach {
             it.forEach {
                 execute (it)
             }
@@ -121,6 +141,12 @@ class ForthMachine {
         println ("EOS")
         return
     }
+}
+
+enum class Base (radix: Int) {
+    HEX (16),
+    OCTAL (8),
+    DECIMAL (10)
 }
 
 // EOF
