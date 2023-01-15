@@ -35,10 +35,17 @@ val BUILTIN_EXTRAS = listOf (
 
 class UserDefined (name: String, val args: List<Token>) : Builtin(name) {
     override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.execute (args, terminal)
-        if (sm.returnStack.isNotEmpty()) {
-            sm.returnStack.clear ()
-            throw IllegalStateException ("Return stack contains ${sm.returnStack.size} items")
+        val doOp = sm.dictionary.get (Do.NAME) as Do
+        try {
+            doOp.push ()
+            sm.execute(args, terminal)
+            if (sm.returnStack.isNotEmpty()) {
+                sm.returnStack.clear()
+                throw IllegalStateException("Return stack contains ${sm.returnStack.size} items")
+            }
+        }
+        finally {
+            doOp.pop ()
         }
         return
     }

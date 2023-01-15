@@ -61,6 +61,7 @@ class Do: Builtin(NAME) {
             if (next is Token.Word) {
                 if (next.word == NAME) {
                     absorbers.add (DoAbsorber ())
+                    ops.add (next)
                 } else if (next.word == LOOP || next.word == LOOP_PLUS) {
                     return Pair (ops, next.word == Do.LOOP_PLUS)
                 } else {
@@ -85,18 +86,39 @@ class Do: Builtin(NAME) {
         }
     }
 
-    var depth = 0
+    /**
+     * We'll keep a list as a sort of primitive stack that we can used to keep track of
+     * the per-declaration invocation count so we can map the variables (I, J, ...) properly.
+     */
+
+    private val invocation = mutableListOf<Int> (0)
+    private val depth: Int
+        get () = invocation.last ()
+
+    fun push () = invocation.add (0)
+    fun pop () = invocation.removeAt (invocation.size - 1)
+    private fun inc () = invocation[invocation.size - 1] ++
+    private fun dec () = invocation[invocation.size - 1] --
+
+    /**
+     *
+     */
 
     override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         try {
-            depth ++
+            inc ()
             val start = sm.pop()
             val end = sm.pop()
             val (loop, isPlus) = parseDo (iter)
 
             var i = start
             do {
-                sm.execute (update (i, depth, loop), terminal)
+                println ("depth - $depth")
+                println ("orig - ${loop.map {it.render ()}}")
+                val updated = update (i, depth, loop)
+                println ("updated - ${updated.map {it.render ()}}")
+                println ()
+                sm.execute (updated, terminal)
                 val delta = if (isPlus) {
                     sm.pop ()
                 } else {
@@ -118,7 +140,7 @@ class Do: Builtin(NAME) {
             // IGNORED
         }
         finally {
-            depth --
+            dec ()
         }
         return
     }
