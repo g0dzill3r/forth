@@ -225,6 +225,81 @@ forth> .S
 
 ## Math
 
+### + 
+
+```agsl
+forth> 12 24 + . 
+36  ok
+```
+
+### - 
+
+```agsl
+forth> 24 12 - . 
+12  ok
+```
+### * 
+
+```agsl
+forth> 12 10 * . 
+120  ok
+```
+
+### / 
+
+```agsl
+forth> 12 4 / . 
+3  ok
+```
+
+### NEGATE
+
+```agsl
+forth> 100 DUP . NEGATE . 
+100 -100  ok
+```
+### MIN
+
+```agsl
+forth> -10 10 MIN . 
+-10  ok
+```
+### MAX
+
+```agsl
+forth> -10 10 MAX . 
+10  ok
+```
+### MOD
+
+```agsl
+forth> 10 3 MOD . 
+1  ok
+```
+### /MOD
+
+```agsl
+forth> 10 3 /MOD . . 
+3 1  ok
+```
+
+### UR
+
+```agsl
+forth> : OUTPUT 5 U.R ; 
+ ok
+forth> 1 3 5 7 13 5 0 DO OUTPUT LOOP
+   13    7    5    3    1 ok
+```
+
+### UL
+
+```agsl
+forth> : OUTPUT 5 U.L ; 
+ ok
+forth> 1 3 5 7 13 5 0 DO OUTPUT LOOP
+13   7    5    3    1     ok
+```
 
 ## Conditionals
 
