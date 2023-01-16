@@ -228,6 +228,7 @@ class Clear: Builtin(NAME) {
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         sm.stack.clear ()
+        sm.returnStack.clear ()
         return
     }
 }

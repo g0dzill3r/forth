@@ -22,21 +22,300 @@ forth> ."Hello, World!"
 Hello, World! ok
 forth> 1 2 + 3 * 4 - 5 / . 
 1  ok
-forth> 5 0 DO I . CR 5 0 DO I J + 5 U.R LOOP CR LOOP
-0 
-    0    1    2    3    4
-1 
-    1    2    3    4    5
-2 
-    2    3    4    5    6
-3 
-    3    4    5    6    7
-4 
-    4    5    6    7    8
+forth> 5 0 DO I . .":= " 5 0 DO I J + 5 U.R LOOP CR LOOP
+0 :=     0    1    2    3    4
+1 :=     1    2    3    4    5
+2 :=     2    3    4    5    6
+3 :=     3    4    5    6    7
+4 :=     4    5    6    7    8
  ok
 ```
 
 ## interp/SwingInterpreter.kt
 
 Implements a Swing-based GUI for interacting with the forth Interpreter. 
+
+# Examples
+
+## General Purpose
+
+### CR - carriage return
+
+```agsl
+forth> : COUNT ."One" CR ."Two" CR ."Three" ; 
+ ok
+forth> COUNT
+One
+Two
+Three ok
+```
+
+### EMIT
+
+```agsl
+forth> : STAR 42 EMIT ; 
+ ok
+forth> : STARS 0 DO STAR LOOP ; 
+ ok
+forth> 5 STARS
+***** ok
+```
+
+### QUIT
+
+```agsl
+forth> QUIT
+Process finished with exit code 255
+```
+
+### ABORT 
+
+```agsl
+forth> : FOO BAR ; 
+ ok
+forth> : BAR BAZ ; 
+ ok
+forth> : BAZ ABORT ."Ooopsie!" ;
+ ok
+forth> FOO
+forth> java.lang.Exception: ABORT: Ooopsie!
+```
+
+### FORGET 
+
+```agsl
+forth> : FOO ."First one!" ; 
+ ok
+forth> FOO
+First one! ok
+forth> : FOO ."Second one!" ; 
+ ok
+forth> FOO
+Second one! ok
+forth> FORGET FOO 
+ ok
+forth> FOO
+First one! ok
+```
+
+## Stack Operations
+
+### . 
+
+```agsl
+forth> 1 2 3 . . . 
+3 2 1  ok
+```
+
+### .S
+
+```agsl
+forth> 1 2 3 .S
+<3> 1 2 3  ok
+```
+
+### DUP 
+
+```agsl
+forth> 123 DUP DUP .S
+<3> 123 123 123  ok
+```
+### ROT
+
+```agsl
+forth> 10 20 30 .S CR ROT .S
+<3> 10 20 30 
+<3> 20 30 10  ok
+```
+### OVER
+
+```agsl
+forth> 100 200 .S CR OVER .S
+<2> 100 200 
+<3> 100 200 100  ok
+```
+
+### DROP
+
+```agsl
+forth> 1 2 3 DROP .S
+<2> 1 2  ok
+```
+
+### 2SWAP 
+
+```agsl
+forth> 1 2 3 4 .S CR 2SWAP .S
+<4> 1 2 3 4 
+<4> 3 4 1 2  ok
+```
+
+### 2DUP
+
+```agsl
+forth> 1 2 .S CR 2DUP .S
+<2> 1 2 
+<4> 1 2 1 2  ok
+```
+
+### 2OVER
+
+```agsl
+forth> 1 2 3 4 .S CR 2OVER .S
+<4> 1 2 3 4 
+<6> 1 2 3 4 1 2  ok
+```
+
+### 2DROP
+
+```agsl
+forth> 1 2 3 4 .S CR 2DROP .S
+<4> 1 2 3 4 
+<2> 1 2  ok
+```
+## The Return Stack
+
+### .R - dump the return stack
+
+```agsl
+forth> 1 2 3 4 5 >R >R >R >R >R .R
+3 2 5 4 3 2 1  ok
+```
+
+### \>R
+
+```agsl
+forth> 1 2 3 .S
+<3> 1 2 3  ok
+forth> >R >R .R
+3 2  ok
+forth> .S
+<1> 1  ok
+```
+
+### R>
+
+```agsl
+forth> 1 2 3 >R >R >R .R
+3 2 1  ok
+forth> .S
+<0> EMPTY ok
+forth> R> R> .S
+<2> 1 2  ok
+forth> .R
+3  ok
+```
+
+### @R
+
+```agsl
+forth> CLEAR
+ ok
+forth> 12345 >R .R
+12345  ok
+forth> .S
+<0> EMPTY ok
+forth> @R
+ ok
+forth> .R
+12345  ok
+forth> .S
+<1> 12345  ok
+```
+
+## Math
+
+
+## Conditionals
+
+### IF
+
+```agsl
+forth> 5 5 = IF ."EQUALS!" ELSE ."NOT EQUALS!" THEN
+EQUALS! ok
+```
+
+### = 
+
+### <> 
+
+### \<
+
+### \> 
+
+### 0=
+
+### 0<
+
+### 0> 
+
+### AND
+
+```agsl
+forth> TRUE TRUE AND . 
+-1  ok
+forth> TRUE FALSE AND . 
+0  ok
+```
+
+### OR
+
+```agsl
+forth> FALSE FALSE OR . 
+0  ok
+forth> FALSE TRUE OR . 
+-1  ok
+```
+
+### INVERT
+
+```agsl
+forth> TRUE DUP . INVERT DUP . INVERT DUP . 
+-1 0 -1  ok
+```
+
+### ?DUP
+
+```agsl
+forth> 1 .S CR ?DUP .S
+<1> 1 
+<2> 1 1  ok
+forth> CLEAR 0 .S CR ?DUP .S
+<1> 0 
+<1> 0  ok
+```
+
+## Looping
+
+### DO 
+
+```agsl
+forth> 5 0 DO I . CR LOOP
+0 
+1 
+2 
+3 
+4 
+ ok
+forth> -5 0 DO I . CR -1 +LOOP
+0 
+-1 
+-2 
+-3 
+-4 
+-5 
+ ok
+```
+
+### BEGIN 
+
+```agsl
+
+```
+
+### LEAVE
+
+```agsl
+
+```
 
