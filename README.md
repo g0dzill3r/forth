@@ -438,13 +438,45 @@ forth> -5 0 DO I . CR -1 +LOOP
 
 ### BEGIN 
 
-```agsl
+BEGIN ... AGAIN syntax
 
+```agsl
+forth> 1 BEGIN
+  DUP . 
+  1 + 
+  DUP 10 > IF LEAVE THEN
+  AGAIN
+1 2 3 4 5 6 7 8 9 10 ok
+```
+
+BEGIN ... UNTIL syntax
+
+```agsl
+forth> 1 BEGIN
+  DUP . 
+  1 + 
+DUP 5 > UNTIL 
+1 2 3 4 5 ok
+```
+
+BEGIN ... WHILE ... REPEAT syntax
+
+```agsl
+forth> 1 BEGIN
+    DUP . 
+    1 + 
+  DUP 5 < WHILE
+    .", " 
+  REPEAT
+1 , 2 , 3 , 4 ok  
 ```
 
 ### LEAVE
 
 ```agsl
-
+forth> 10 0 DO 
+  I . 
+  I 5 > IF LEAVE THEN
+LOOP
+0 1 2 3 4 5 6 ok
 ```
-
