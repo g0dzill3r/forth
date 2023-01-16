@@ -2,6 +2,7 @@ package builtin
 
 import Builtin
 import ForthMachine
+import Invokable
 import PeekableIterator
 import Token
 
@@ -34,7 +35,7 @@ val BUILTIN_EXTRAS = listOf (
     ": 2/ 2 / ;",
 )
 
-class UserDefined (name: String, val args: List<Token>) : Builtin(name) {
+class UserDefined (val name: String, val args: List<Token>) : Invokable {
     override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         val doOp = sm.dictionary.get (Do.NAME) as Do
         try {
@@ -119,10 +120,16 @@ class SafePeriod: Builtin(NAME) {
         if (sm.stack.isNotEmpty()) {
             terminal.append ("<${sm.stack.size}> ${sm.stack.joinToString(" ")} ")
         } else {
-            terminal.append ("<${sm.stack.size}> EMPTY")
+            terminal.append ("<${0}> EMPTY")
         }
     }
 }
+
+/**
+ * Swaps the two top stack elements.
+ *
+ * ( a b -- b a)
+ */
 
 
 class Swap : Builtin(NAME) {
@@ -138,6 +145,12 @@ class Swap : Builtin(NAME) {
 
 }
 
+/**
+ * Duplicates the top stack element.
+ *
+ * (a -- a a)
+ */
+
 class Dup: Builtin(NAME) {
     companion object {
         const val NAME = "DUP"
@@ -148,6 +161,12 @@ class Dup: Builtin(NAME) {
         return
     }
 }
+
+/**
+ * Copies the second stack element over the first.
+ *
+ * (a b -- a b a)
+ */
 
 class Over: Builtin(NAME) {
     companion object {
@@ -161,6 +180,12 @@ class Over: Builtin(NAME) {
     }
 }
 
+/**
+ * Rotates the top three stack elements.
+ *
+ * (a b c -- b c a)
+ */
+
 class Rot: Builtin(NAME) {
     companion object {
         const val NAME = "ROT"
@@ -173,6 +198,12 @@ class Rot: Builtin(NAME) {
     }
 }
 
+/**
+ * Drops the top stack element.
+ *
+ * (a -- -)
+ */
+
 class Drop: Builtin(NAME) {
     companion object {
         const val NAME = "DROP"
@@ -183,6 +214,12 @@ class Drop: Builtin(NAME) {
         return
     }
 }
+
+/**
+ * Clears the stack.
+ *
+ * (a ... -- -)
+ */
 
 class Clear: Builtin(NAME) {
     companion object {

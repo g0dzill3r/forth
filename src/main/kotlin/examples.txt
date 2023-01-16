@@ -1,7 +1,6 @@
 CLEAR
 : ** ( a b -- a^b )
-    >R
-    @R
+    >R @R
     DUP 1 > IF
       1 DO DUP LOOP
     ELSE

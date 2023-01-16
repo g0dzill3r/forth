@@ -113,11 +113,7 @@ class Do: Builtin(NAME) {
 
             var i = start
             do {
-                println ("depth - $depth")
-                println ("orig - ${loop.map {it.render ()}}")
                 val updated = update (i, depth, loop)
-                println ("updated - ${updated.map {it.render ()}}")
-                println ()
                 sm.execute (updated, terminal)
                 val delta = if (isPlus) {
                     sm.pop ()

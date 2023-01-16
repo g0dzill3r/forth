@@ -11,6 +11,8 @@ abstract class Builtin (val name: String): Invokable {
 }
 
 /**
+ * A simple Forth interpreter.
+ *
  * https://www.forth.com/starting-forth/3-forth-editor-blocks-buffer/
  * https://galileo.phys.virginia.edu/classes/551.jvn.fall01/primer.htm#contents
  * https://thinking-forth.sourceforge.net/
