@@ -102,23 +102,36 @@ class ZeroGreaterThan : Builtin (NAME) {
     }
 }
 
+
+/**
+ *
+ */
+
+
 class And : Builtin (NAME) {
     companion object {
         const val NAME = "AND"
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pushBoolean (sm.popBoolean() && sm.popBoolean())
+//        sm.pushBoolean (sm.popBoolean() && sm.popBoolean())
+        sm.push (sm.pop() and sm.pop ())
         return
     }
 }
+
+/**
+ *
+ */
+
 class Or : Builtin (NAME) {
     companion object {
         const val NAME = "OR"
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pushBoolean (sm.popBoolean() || sm.popBoolean())
+//        sm.pushBoolean (sm.popBoolean() || sm.popBoolean())
+        sm.push (sm.pop () or sm.pop ())
         return
     }
 }

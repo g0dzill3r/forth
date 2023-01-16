@@ -179,7 +179,7 @@ forth> 1 2 3 4 .S CR 2DROP .S
 
 ```agsl
 forth> 1 2 3 4 5 >R >R >R >R >R .R
-3 2 5 4 3 2 1  ok
+5 4 3 2 1  ok
 ```
 
 ### \>R
@@ -312,17 +312,67 @@ EQUALS! ok
 
 ### = 
 
+```agsl
+forth> 1 1 + 1 1 + = . 
+-1  ok
+forth> 10 -10 = . 
+0  ok
+```
+
 ### <> 
+
+```agsl
+forth> 5 5 <> .
+0  ok
+forth> 5 4 <> .
+-1  ok
+```
 
 ### \<
 
+```agsl
+forth> 1 2 < .
+-1  ok
+forth> 2 1 < .
+0  ok
+```
+
 ### \> 
+
+```agsl
+forth> 1 2 > . 
+0  ok
+forth> 2 1 > . 
+-1  ok
+```
+
 
 ### 0=
 
+```agsl
+forth> 0 0= . 
+-1  ok
+forth> 1 0= . 
+0  ok
+```
+
 ### 0<
 
+```agsl
+forth> 1 0< . 
+0  ok
+forth> -1 0< .
+-1  ok
+```
+
 ### 0> 
+
+```agsl
+forth> 1 0> . 
+-1  ok
+forth> -1 0> . 
+0  ok
+```
 
 ### AND
 
@@ -331,6 +381,8 @@ forth> TRUE TRUE AND .
 -1  ok
 forth> TRUE FALSE AND . 
 0  ok
+forth> BINARY 1011011 1101110 AND . 
+1001010  ok
 ```
 
 ### OR
@@ -340,6 +392,8 @@ forth> FALSE FALSE OR .
 0  ok
 forth> FALSE TRUE OR . 
 -1  ok
+forth> BINARY 10000 01111 OR . 
+11111  ok
 ```
 
 ### INVERT
