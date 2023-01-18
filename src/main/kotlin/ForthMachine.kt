@@ -65,7 +65,7 @@ class ForthMachine {
                         if (addr != null) {
                             stack.push (addr)
                         } else {
-                            val op = dictionary.get (word)
+                            val op = dictionary.get (word.uppercase ())
                             if (op != null) {
                                 op.perform (iter, this, terminal)
                             } else {

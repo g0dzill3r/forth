@@ -36,7 +36,7 @@ class ForthDictionary {
     }
 
     fun add (op: String, binding: Invokable) {
-        list.add (op to binding)
+        list.add (op.uppercase() to binding)
         return
     }
 
