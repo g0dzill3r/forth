@@ -70,6 +70,9 @@ Process finished with exit code 255
 
 ### ABORT 
 
+NOTE: I decided to abandon the arcane actual syntax of the ABORT command and implement it using the standard
+lexical primitives.  So, you cannot do `ABORT" Oopsie."` and instead do `ABORT ."Oopsie."`.
+
 ```agsl
 forth> : FOO BAR ; 
  ok

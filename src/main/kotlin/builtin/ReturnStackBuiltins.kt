@@ -20,7 +20,7 @@ class PushRetStack : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.returnStack.push (sm.pop ())
+        sm.returnStack.push (sm.stack.pop ())
         return
     }
 }
@@ -31,7 +31,7 @@ class PopRetStack : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.push (sm.returnStack.pop ())
+        sm.stack.push (sm.returnStack.pop ())
         return
     }
 }
@@ -42,7 +42,7 @@ class CopyRetStack : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.push (sm.returnStack.peek ())
+        sm.stack.push (sm.returnStack.peek ())
         return
     }
 }
@@ -53,11 +53,8 @@ class RetStackPeriod: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        if (sm.returnStack.isNotEmpty()) {
-            print("${sm.returnStack.joinToString(" ")} ")
-        } else {
-            print ("EMPTY")
-        }
+        terminal.append (sm.returnStack.dump (sm.base))
+        return
     }
 }
 

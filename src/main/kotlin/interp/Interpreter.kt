@@ -11,7 +11,6 @@ fun main() {
     interpreter("forth> ") {
         var done = false
         when {
-            it == "dump" -> sm.dump()
             it == "quit" -> done = true
             it == "ops" -> {
                 sm.dictionary.list.forEach { (op, func) ->

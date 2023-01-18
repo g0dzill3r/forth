@@ -36,7 +36,7 @@ class Abs : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.push (abs (sm.pop ()))
+        sm.stack.push (abs (sm.stack.pop ()))
         return
     }
 }
@@ -47,7 +47,7 @@ class Negate : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.push (- sm.pop ())
+        sm.stack.push (- sm.stack.pop ())
         return
     }
 }
@@ -58,7 +58,7 @@ class Min : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.push (min (sm.pop (), sm.pop ()))
+        sm.stack.push (min (sm.stack.pop (), sm.stack.pop ()))
         return
     }
 }
@@ -69,7 +69,7 @@ class Max : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.push (max (sm.pop (), sm.pop ()))
+        sm.stack.push (max (sm.stack.pop (), sm.stack.pop ()))
         return
     }
 }
@@ -80,8 +80,8 @@ class Mod : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (b % a)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (b % a)
 
     }
 }
@@ -92,9 +92,9 @@ class DivMod : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (b % a)
-        sm.push (b / a)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (b % a)
+        sm.stack.push (b / a)
     }
 }
 
@@ -104,8 +104,8 @@ class Add : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (a + b)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (a + b)
     }
 
 }
@@ -116,8 +116,8 @@ class Subtract : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (b - a)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (b - a)
     }
 }
 
@@ -127,8 +127,8 @@ class Multiply : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (a * b)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (a * b)
     }
 }
 
@@ -138,8 +138,8 @@ class Divide : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (b / a)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (b / a)
     }
 }
 
@@ -149,8 +149,8 @@ class UR : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val width = sm.pop ()
-        terminal.append (String.format ("%${width}d", sm.pop ()))
+        val width = sm.stack.pop ()
+        terminal.append (String.format ("%${width}d", sm.stack.pop ()))
         return
     }
 }
@@ -161,8 +161,8 @@ class UL : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val width = sm.pop ()
-        terminal.append (String.format ("%-${width}d", sm.pop ()))
+        val width = sm.stack.pop ()
+        terminal.append (String.format ("%-${width}d", sm.stack.pop ()))
         return
     }
 }

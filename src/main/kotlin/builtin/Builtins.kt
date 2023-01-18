@@ -41,8 +41,8 @@ class UserDefined (val name: String, val args: List<Token>) : Invokable {
         try {
             doOp.push ()
             sm.execute(args, terminal)
-            if (sm.returnStack.isNotEmpty()) {
-                sm.returnStack.clear()
+            if (sm.returnStack.isNotEmpty) {
+                sm.returnStack.clear ()
                 throw IllegalStateException("Return stack contains ${sm.returnStack.size} items")
             }
         }
@@ -80,7 +80,7 @@ class Spaces : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val times = sm.pop ()
+        val times = sm.stack.pop ()
         repeat (times) {
             terminal.append (' ')
         }
@@ -93,7 +93,7 @@ class Emit : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val code = sm.pop ()
+        val code = sm.stack.pop ()
         val c = Char (code)
         terminal.append (c)
         return
@@ -106,7 +106,7 @@ class Period: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val value = sm.pop ()
+        val value = sm.stack.pop ()
         terminal.append ("${value.toString (sm.base)} ")
     }
 }
@@ -117,11 +117,8 @@ class SafePeriod: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        if (sm.stack.isNotEmpty()) {
-            terminal.append ("<${sm.stack.size}> ${sm.stack.joinToString(" ")} ")
-        } else {
-            terminal.append ("<${0}> EMPTY")
-        }
+        terminal.append (sm.stack.dump (sm.base))
+        return
     }
 }
 
@@ -138,8 +135,8 @@ class Swap : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (a, b)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (a, b)
         return
     }
 
@@ -157,7 +154,7 @@ class Dup: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.push (sm.peek ())
+        sm.stack.push (sm.stack.peek ())
         return
     }
 }
@@ -174,8 +171,8 @@ class Over: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (b, a, b)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (b, a, b)
         return
     }
 }
@@ -192,8 +189,8 @@ class Rot: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b, c) = sm.pop (3)
-        sm.push (b, a, c)
+        val (a, b, c) = sm.stack.pop (3)
+        sm.stack.push (b, a, c)
         return
     }
 }
@@ -210,7 +207,7 @@ class Drop: Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pop ()
+        sm.stack.pop ()
         return
     }
 }
@@ -239,8 +236,8 @@ class TwoSwap : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b, c, d) = sm.pop (4)
-        sm.push (b, a, d, c)
+        val (a, b, c, d) = sm.stack.pop (4)
+        sm.stack.push (b, a, d, c)
         return
     }
 }
@@ -251,8 +248,8 @@ class TwoDup : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.push (b, a, b, a)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.push (b, a, b, a)
         return
     }
 }
@@ -263,8 +260,8 @@ class TwoOver : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b, c, d) = sm.pop (4)
-        sm.push (d, c, b, a, d, c)
+        val (a, b, c, d) = sm.stack.pop (4)
+        sm.stack.push (d, c, b, a, d, c)
         return
     }
 }
@@ -275,7 +272,7 @@ class TwoDrop : Builtin(NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pop (2)
+        sm.stack.pop (2)
         return
     }
 }
@@ -293,7 +290,7 @@ class Forget : Builtin(NAME) {
 
 class Quit: Builtin (NAME) {
     companion object {
-        const val NAME = "QUIT"
+        const val NAME = "BYE"
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {

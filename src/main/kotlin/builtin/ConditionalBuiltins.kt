@@ -15,6 +15,7 @@ val COND_BUILTINS = listOf (
     ZeroLessThan::class,
     ZeroGreaterThan::class,
     And::class,
+    Xor::class,
     Or::class,
     MaybeDup::class,
     Abort::class,
@@ -33,8 +34,8 @@ class Equals : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.pushBoolean (a == b)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.pushBoolean (a == b)
     }
 }
 
@@ -44,8 +45,8 @@ class NotEquals : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.pushBoolean (a != b)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.pushBoolean (a != b)
     }
 }
 
@@ -55,8 +56,8 @@ class LessThan : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.pushBoolean (b < a)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.pushBoolean (b < a)
 
     }
 }
@@ -67,8 +68,8 @@ class GreaterThan : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        val (a, b) = sm.pop (2)
-        sm.pushBoolean (b > a)
+        val (a, b) = sm.stack.pop (2)
+        sm.stack.pushBoolean (b > a)
     }
 }
 
@@ -78,7 +79,7 @@ class ZeroEquals : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pushBoolean (sm.pop () == 0)
+        sm.stack.pushBoolean (sm.stack.pop () == 0)
     }
 }
 
@@ -88,7 +89,7 @@ class ZeroLessThan : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pushBoolean (sm.pop () < 0)
+        sm.stack.pushBoolean (sm.stack.pop () < 0)
     }
 }
 
@@ -98,10 +99,20 @@ class ZeroGreaterThan : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pushBoolean (sm.pop () > 0)
+        sm.stack.pushBoolean (sm.stack.pop () > 0)
     }
 }
 
+
+class Xor : Builtin (NAME) {
+    companion object {
+        const val NAME = "XOR"
+    }
+
+    override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
+        sm.stack.push (sm.stack.pop () xor sm.stack.pop ())
+    }
+}
 
 /**
  *
@@ -114,8 +125,8 @@ class And : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-//        sm.pushBoolean (sm.popBoolean() && sm.popBoolean())
-        sm.push (sm.pop() and sm.pop ())
+//        sm.stack.pushBoolean (sm.stack.popBoolean() && sm.stack.popBoolean())
+        sm.stack.push (sm.stack.pop() and sm.stack.pop ())
         return
     }
 }
@@ -130,8 +141,8 @@ class Or : Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-//        sm.pushBoolean (sm.popBoolean() || sm.popBoolean())
-        sm.push (sm.pop () or sm.pop ())
+//        sm.stack.pushBoolean (sm.stack.popBoolean() || sm.stack.popBoolean())
+        sm.stack.push (sm.stack.pop () or sm.stack.pop ())
         return
     }
 }
@@ -142,8 +153,8 @@ class MaybeDup: Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        if (sm.peekBoolean()) {
-            sm.push (sm.peek ())
+        if (sm.stack.peekBoolean ()) {
+            sm.stack.push (sm.stack.peek ())
         }
         return
     }
@@ -175,7 +186,7 @@ class Invert: Builtin (NAME) {
     }
 
     override fun perform(iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
-        sm.pushBoolean (! sm.popBoolean ())
+        sm.stack.pushBoolean (! sm.stack.popBoolean ())
         return
     }
 }
@@ -258,7 +269,7 @@ class If: Builtin(NAME) {
 
     override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         val (happy, sad) = parseIf (iter)
-        if (sm.popBoolean()) {
+        if (sm.stack.popBoolean()) {
             sm.execute (happy, terminal)
         } else {
             if (sad != null) {

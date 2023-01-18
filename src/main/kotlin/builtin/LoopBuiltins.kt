@@ -107,8 +107,8 @@ class Do: Builtin(NAME) {
     override fun perform (iter: PeekableIterator<Token>, sm: ForthMachine, terminal: StringBuffer) {
         try {
             inc ()
-            val start = sm.pop()
-            val end = sm.pop()
+            val start = sm.stack.pop()
+            val end = sm.stack.pop()
             val (loop, isPlus) = parseDo (iter)
 
             var i = start
@@ -116,7 +116,7 @@ class Do: Builtin(NAME) {
                 val updated = update (i, depth, loop)
                 sm.execute (updated, terminal)
                 val delta = if (isPlus) {
-                    sm.pop ()
+                    sm.stack.pop ()
                 } else {
                     1
                 }
@@ -265,7 +265,7 @@ class Begin : Builtin (NAME) {
         try {
             while (true) {
                 sm.execute (first, terminal)
-                if (! sm.popBoolean()) {
+                if (! sm.stack.popBoolean()) {
                     break
                 }
                 sm.execute (second, terminal)
@@ -290,7 +290,7 @@ class Begin : Builtin (NAME) {
         try {
             while (true) {
                 sm.execute (ops, terminal)
-                if (sm.popBoolean ()) {
+                if (sm.stack.popBoolean ()) {
                     break
                 }
             }
